@@ -1,6 +1,9 @@
+const _ = require('lodash');
 var express = require('express');
 var bodyParser = require('body-parser');
-const {ObjectID} = require('mongodb');
+const {
+  ObjectID
+} = require('mongodb');
 
 var {
   mongoose
@@ -42,15 +45,21 @@ app.get('/todos/:id', (req, res) => {
   var id = req.params.id;
 
   //Validate ID
-  if(!ObjectID.isValid(id)){
-    return res.status(404).send({err: 'INVALID_ID'});
+  if (!ObjectID.isValid(id)) {
+    return res.status(404).send({
+      err: 'INVALID_ID'
+    });
   }
   Todo.findById(id).then((todo) => {
-    if(!todo){
-      return res.status(404).send({err: 'TODO_NOT_FOUND'});
+    if (!todo) {
+      return res.status(404).send({
+        err: 'TODO_NOT_FOUND'
+      });
     }
 
-    res.send({todo});
+    res.send({
+      todo
+    });
   }).catch((e) => res.status(400).end(e));
 });
 
@@ -58,20 +67,62 @@ app.delete('/todos/:id', (req, res) => {
   //Get the id
   var id = req.params.id;
   //Validate ID
-  if(!ObjectID.isValid(id)){
-    return res.status(404).send({err: 'INVALID_ID'});
+  if (!ObjectID.isValid(id)) {
+    return res.status(404).send({
+      err: 'INVALID_ID'
+    });
   }
   //Remove todo by ID
   Todo.findByIdAndDelete(id).then((todo) => {
-    if(!todo){
+    if (!todo) {
       //if no doc, send 404
-      return res.status(404).send({err: 'TODO_NOT_FOUND'})
+      return res.status(404).send({
+        err: 'TODO_NOT_FOUND'
+      })
     }
     //Success
-    res.send({todo});
+    res.send({
+      todo
+    });
     //error
   }).catch((e) => res.status(400).end(e));
 });
+
+app.patch('/todos/:id', (req, res) => {
+  //Get the id
+  var id = req.params.id;
+  var body = _.pick(req.body, ['text', 'completed']);
+
+  //Validate ID
+  if (!ObjectID.isValid(id)) {
+    return res.status(404).send({
+      err: 'INVALID_ID'
+    });
+  }
+
+  if (_.isBoolean(body.completed) && body.completed) {
+    body.completedAt = new Date().getTime();
+  } else {
+    body.completed = false;
+    body.completedAt = null;
+  }
+
+  Todo.findByIdAndUpdate(id, {
+    $set: body
+  }, {
+    new: true
+  }).then((todo) => {
+    if(!todo) {
+      return res.status(404).send({
+        err: 'TODO_NOT_FOUND'
+      });
+    }
+    res.send({todo});
+  }).catch((e) => {
+    res.status(400).send();
+  })
+});
+
 app.listen(port, () => {
   console.log(`Started on port ${port}`);
 });
