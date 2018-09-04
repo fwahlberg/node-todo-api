@@ -3,7 +3,7 @@ var mongoose = require('mongoose');
 //Promise library
 mongoose.Promise = global.Promise;
 //Connect to debug
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/TodoApp', {
+mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true
 });
 

@@ -1,3 +1,5 @@
+require('./config/config');
+
 const _ = require('lodash');
 var express = require('express');
 var bodyParser = require('body-parser');
@@ -112,12 +114,14 @@ app.patch('/todos/:id', (req, res) => {
   }, {
     new: true
   }).then((todo) => {
-    if(!todo) {
+    if (!todo) {
       return res.status(404).send({
         err: 'TODO_NOT_FOUND'
       });
     }
-    res.send({todo});
+    res.send({
+      todo
+    });
   }).catch((e) => {
     res.status(400).send();
   })
